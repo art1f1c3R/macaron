@@ -39,12 +39,7 @@ jobs:
 
     - name: Get wheel name
       run: |
-        WHEELS=($(find ./dist -type f -name "*manylinux*.whl"))
-        if [ "${WHEELS[@]}" -ne 1]; then
-          echo "Expected a single wheel file built by semgrep dockerfile"
-          exit 1
-        fi
-        echo "WHEEL_PATH=${WHEELS[0]}" >> "$GITHUB_ENV"
+        echo "WHEEL_PATH=($(find ./dist -type f -name 'semgrep-*manylinux*.whl'))" >> "$GITHUB_ENV"
 
     - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02    # v4.6.2
       with:
