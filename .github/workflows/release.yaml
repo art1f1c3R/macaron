@@ -20,6 +20,9 @@ env:
   USER_EMAIL: behnazh-w@users.noreply.github.com
   IMAGE_NAME: ghcr.io/oracle/macaron
 
+  SEMGREP_ARTIFACT_NAME: semgrep_wheel_manylinux.whl
+  SEMGREP_ARTIFACT_RUN_ID: 14769822308
+
 jobs:
   check:
     if: ${{ !startsWith(github.event.commits[0].message, 'bump:') }}
@@ -145,6 +148,14 @@ jobs:
         set -euo pipefail
         echo "Hash of package should be $ARTIFACT_HASH."
         echo "$ARTIFACT_HASH" | base64 --decode | sha256sum --strict --check --status || exit 1
+
+    - name: Download Semgrep artifact
+      uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e # v4.2.1
+      with:
+        name: ${{ env.SEMGREP_ARTIFACT_NAME }}
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        run-id: ${{ env.SEMGREP_ARTIFACT_RUN_ID }}
+        path: dist
 
     # Log in to ghcr.io to push the Docker image.
     - name: Log in to GitHub Container Registry

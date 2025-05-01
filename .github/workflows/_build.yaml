@@ -1,4 +1,4 @@
-# Copyright (c) 2022 - 2023, Oracle and/or its affiliates. All rights reserved.
+# Copyright (c) 2022 - 2025, Oracle and/or its affiliates. All rights reserved.
 # Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl/.
 
 # This is a trusted builder implemented as a reusable workflow that can be called by other
@@ -149,3 +149,6 @@ jobs:
       # TODO: use ${{ env.ARTIFACT_OS }} and ${{ env.ARTIFACT_PYTHON }}
       # when this issue is addressed: https://github.com/actions/runner/issues/2394.
       artifact-name: artifact-ubuntu-latest-python-3.11
+
+      semgrep-artifact-name: semgrep_wheel_manylinux.whl
+      semgrep-artifact-run-id: 14769822308

@@ -28,17 +28,25 @@ WORKDIR $HOME
 
 # Build time ARG. This argument specifies the path of the wheel file from the host machine.
 ARG WHEEL_PATH
+# Build time ARG. This argument specifies the path of the semgrep wheel file from the host machine.
+ARG SEMGREP_WHEEL_PATH
 
 # Installing the Python dependencies in the Python virtual environment.
 # We switch to user macaron so that when we install the dependencies using pip,
 # the warning of not having correct ownership of /home/macaron is not raised.
+# We uninstall semgrep using pip before installing the semgrep wheel artifact, as
+# it is part of the project's dependencies. Pip does uninstall all binary and library
+# files related to semgrep from the `bin` and `lib` directories in the virtual environment.
 USER macaron:macaron
 COPY --chown=macaron:macaron $WHEEL_PATH $HOME/dist/
+COPY --chown=macaron:macaron $SEMGREP_WHEEL_PATH $HOME/dist/
 RUN : \
     && python3 -m venv $HOME/.venv \
     && . .venv/bin/activate \
     && pip install --no-compile --no-cache-dir --upgrade pip setuptools \
     && find $HOME/dist -depth \( -type f \( -name "macaron-*.whl" \) \) -exec pip install --no-compile --no-cache-dir '{}' \; \
+    && pip uninstall semgrep \
+    && find $HOME/dist -depth \( -type f \( -name "semgrep-*.whl" \) \) -exec pip install --no-compile --no-cache-dir '{}' \; \
     && rm -rf $HOME/dist \
     && deactivate
 

@@ -1,4 +1,4 @@
-# Copyright (c) 2023 - 2024, Oracle and/or its affiliates. All rights reserved.
+# Copyright (c) 2023 - 2025, Oracle and/or its affiliates. All rights reserved.
 # Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl/.
 
 # This is a reuseable workflow to build and test the Docker image. Note that this workflow does not
@@ -16,6 +16,12 @@ on:
       artifact-sha256:
         required: true
         type: string
+      semgrep-artifact-name:
+        required: true
+        type: string
+      semgrep-artifact-run-id:
+        required: true
+        type: number
 permissions:
   contents: read
 
@@ -41,6 +47,14 @@ jobs:
       uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e # v4.2.1
       with:
         name: ${{ inputs.artifact-name }}
+        path: dist
+
+    - name: Download Semgrep artifact
+      uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e # v4.2.1
+      with:
+        name: ${{ inputs.semgrep-artifact-name }}
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        run-id: ${{ inputs.semgrep-artifact-run-id }}
         path: dist
 
     # Verify hashes by first computing hashes for the artifacts and then comparing them
