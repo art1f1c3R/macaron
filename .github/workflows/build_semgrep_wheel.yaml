@@ -40,7 +40,7 @@ jobs:
       run: |
         echo "FROM scratch
         ARG SEMGREP_WHEEL_PATH
-        COPY ${SEMGREP_WHEEL_PATH} /semgrep_wheel.whl" >> Dockerfile.semgrep
+        COPY \$SEMGREP_WHEEL_PATH /semgrep_wheel.whl" >> Dockerfile.semgrep
         WHEEL_PATH=$(find dist -type f -name 'semgrep-*manylinux*.whl')
         docker build -t ghcr.io/art1f1c3r/macaron-semgrep-wheel:latest -f Dockerfile.semgrep --build-arg SEMGREP_WHEEL_PATH=${WHEEL_PATH}  .
         docker push ghcr.io/art1f1c3r/macaron-semgrep-wheel:latest
