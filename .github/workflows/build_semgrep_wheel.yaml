@@ -17,17 +17,13 @@ jobs:
         shell: bash
 
     steps:
-    - name: Install git   # for cloning Semgrep repository
-      run: |
-        sudo apt-get install git
-
-    - name: Clone Semgrep v1.113.0 repository
-      run: |
-        git init
-        git remote add origin https://github.com/semgrep/semgrep.git
-        git fetch --depth 1 origin 4729a05d24bf9cee8face447e8a6d418037d61d8
-        git checkout FETCH_HEAD
-        git submodule update --init --recursive --depth 1
+    - name: Check out Semgrep v1.113.0 repository
+      uses: actions/checkout@d632683dd7b4114ad314bca15554477dd762a938 # v4.2.0
+      with:
+        repository: semgrep/semgrep.git
+        ref: 4729a05d24bf9cee8face447e8a6d418037d61d8
+        fetch-depth: 1
+        submodules: recursive
 
     - name: Build wheel through docker
       run: |
@@ -37,15 +33,14 @@ jobs:
         docker cp temp:/semgrep/cli/dist/ dist/
         docker container rm temp
 
-    - name: Get wheel name
-      run: |
-        WHEEL_PATH=$(find dist -type f -name 'semgrep-*manylinux*.whl')
-        echo "WHEEL_PATH=$WHEEL_PATH" >> "$GITHUB_ENV"
+    - name: Log in to GitHub Container Registry
+      run: docker login ghcr.io --username ${{ github.actor }} --password ${{ secrets.GITHUB_TOKEN }}
 
-    - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02    # v4.6.2
-      with:
-        name: semgrep_wheel_manylinux.whl
-        path: ${{ env.WHEEL_PATH }}
-        if-no-files-found: error
-        compression-level: 0   # don't compress the wheel file
-        retention-days: 90   # uploaded wheel valid for 90 days, before workflow must be run again
+    - name: Build and push semgrep wheel image
+      run: |
+        echo "FROM scratch
+        ARG SEMGREP_WHEEL_PATH
+        COPY ${SEMGREP_WHEEL_PATH} /semgrep_wheel" >> Dockerfile.semgrep
+        WHEEL_PATH=$(find dist -type f -name 'semgrep-*manylinux*.whl')
+        docker build -t ghcr.io/art1f1c3R/macaron-semgrep-wheel:latest -f Dockerfile.semgrep --build-arg SEMGREP_WHEEL_PATH=${WHEEL_PATH}  .
+        docker push ghcr.io/art1f1c3R/macaron-semgrep-wheel:latest
