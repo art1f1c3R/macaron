@@ -18,10 +18,7 @@ env:
   # commit. In an organisation that should be a dedicated devops account.
   USER_NAME: behnazh-w
   USER_EMAIL: behnazh-w@users.noreply.github.com
-  IMAGE_NAME: ghcr.io/oracle/macaron
-
-  SEMGREP_ARTIFACT_NAME: semgrep_wheel_manylinux.whl
-  SEMGREP_ARTIFACT_RUN_ID: 14769822308
+  IMAGE_NAME: ghcr.io/art1f1c3r/macaron
 
 jobs:
   check:
@@ -149,14 +146,6 @@ jobs:
         echo "Hash of package should be $ARTIFACT_HASH."
         echo "$ARTIFACT_HASH" | base64 --decode | sha256sum --strict --check --status || exit 1
 
-    - name: Download Semgrep artifact
-      uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e # v4.2.1
-      with:
-        name: ${{ env.SEMGREP_ARTIFACT_NAME }}
-        github-token: ${{ secrets.GITHUB_TOKEN }}
-        run-id: ${{ env.SEMGREP_ARTIFACT_RUN_ID }}
-        path: dist
-
     # Log in to ghcr.io to push the Docker image.
     - name: Log in to GitHub Container Registry
       run: docker login ghcr.io --username ${{ github.actor }} --password ${{ secrets.GITHUB_TOKEN }}
@@ -215,7 +204,7 @@ jobs:
           tar -zxvf "$ASSET_NAME" -C "$SYFT_BIN" syft
           "$SYFT_BIN"/syft --version
           "$SYFT_BIN"/syft \
-            ghcr.io/oracle/macaron:"$RELEASE_TAG" \
+            ghcr.io/art1f1c3r/macaron:"$RELEASE_TAG" \
             -o cyclonedx-json=dist/macaron-"$RELEASE_VERSION"-sbom-docker.json
         else
           echo "Checksum for '$ASSET_NAME' did not verify: expected $EXPECTED but got $SYFT_DIGEST"

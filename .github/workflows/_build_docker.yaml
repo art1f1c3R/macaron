@@ -16,12 +16,6 @@ on:
       artifact-sha256:
         required: true
         type: string
-      semgrep-artifact-name:
-        required: true
-        type: string
-      semgrep-artifact-run-id:
-        required: true
-        type: number
 permissions:
   contents: read
 
@@ -49,14 +43,6 @@ jobs:
         name: ${{ inputs.artifact-name }}
         path: dist
 
-    - name: Download Semgrep artifact
-      uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e # v4.2.1
-      with:
-        name: ${{ inputs.semgrep-artifact-name }}
-        github-token: ${{ secrets.GITHUB_TOKEN }}
-        run-id: ${{ inputs.semgrep-artifact-run-id }}
-        path: dist
-
     # Verify hashes by first computing hashes for the artifacts and then comparing them
     # against the hashes for the artifact.
     - name: Verify the artifact hash
@@ -70,7 +56,7 @@ jobs:
     # Build the Docker image without pushing it.
     - name: Build the Docker image
       env:
-        IMAGE_NAME: ghcr.io/oracle/macaron
+        IMAGE_NAME: ghcr.io/art1f1c3r/macaron
       run: make build-docker
 
     - name: Install dependencies for integration test utility

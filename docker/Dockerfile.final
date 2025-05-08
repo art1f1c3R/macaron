@@ -10,7 +10,9 @@
 # Note that the local machine must login to ghcr.io so that Docker could pull the ghcr.io/oracle/macaron-base
 # image for this build.
 
-FROM ghcr.io/oracle/macaron-base:latest@sha256:79b3b8b03cb9b6a124c6450f4baa58f96f83ee9e37f572c88a97597b35c7bc51
+FROM ghcr.io/art1f1c3r/macaron-semgrep-wheel:latest as wheel_stage
+
+FROM ghcr.io/art1f1c3r/macaron-base:latest@sha256:79b3b8b03cb9b6a124c6450f4baa58f96f83ee9e37f572c88a97597b35c7bc51
 
 ENV HOME="/home/macaron"
 
@@ -28,8 +30,6 @@ WORKDIR $HOME
 
 # Build time ARG. This argument specifies the path of the wheel file from the host machine.
 ARG WHEEL_PATH
-# Build time ARG. This argument specifies the path of the semgrep wheel file from the host machine.
-ARG SEMGREP_WHEEL_PATH
 
 # Installing the Python dependencies in the Python virtual environment.
 # We switch to user macaron so that when we install the dependencies using pip,
@@ -39,14 +39,14 @@ ARG SEMGREP_WHEEL_PATH
 # files related to semgrep from the `bin` and `lib` directories in the virtual environment.
 USER macaron:macaron
 COPY --chown=macaron:macaron $WHEEL_PATH $HOME/dist/
-COPY --chown=macaron:macaron $SEMGREP_WHEEL_PATH $HOME/dist/
+COPY --chown=macaron:macaron --from=wheel_stage /semgrep_wheel.whl $HOME/dist/semgrep_wheel.whl
 RUN : \
     && python3 -m venv $HOME/.venv \
     && . .venv/bin/activate \
     && pip install --no-compile --no-cache-dir --upgrade pip setuptools \
     && find $HOME/dist -depth \( -type f \( -name "macaron-*.whl" \) \) -exec pip install --no-compile --no-cache-dir '{}' \; \
     && pip uninstall semgrep \
-    && find $HOME/dist -depth \( -type f \( -name "semgrep-*.whl" \) \) -exec pip install --no-compile --no-cache-dir '{}' \; \
+    && pip install --no-compile --no-cache-dir $HOME/dist/semgrep_wheel.whl \; \
     && rm -rf $HOME/dist \
     && deactivate
 
