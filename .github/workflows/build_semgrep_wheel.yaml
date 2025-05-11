@@ -38,9 +38,8 @@ jobs:
 
     - name: Build and push semgrep wheel image
       run: |
-        echo "FROM scratch
-        ARG SEMGREP_WHEEL_PATH
-        COPY \$SEMGREP_WHEEL_PATH /semgrep_wheel.whl" >> Dockerfile.semgrep
         WHEEL_PATH=$(find wheels -type f -name 'semgrep-*manylinux*.whl')
-        docker build -t ghcr.io/art1f1c3r/macaron-semgrep-wheel:latest -f Dockerfile.semgrep --build-arg SEMGREP_WHEEL_PATH=${WHEEL_PATH}  .
+        echo "FROM scratch
+        COPY ${WHEEL_PATH} /semgrep_wheel.whl" >> Dockerfile.semgrep
+        docker build -t ghcr.io/art1f1c3r/macaron-semgrep-wheel:latest -f Dockerfile.semgrep .
         docker push ghcr.io/art1f1c3r/macaron-semgrep-wheel:latest
