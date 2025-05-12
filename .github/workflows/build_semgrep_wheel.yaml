@@ -12,6 +12,8 @@ jobs:
   build-semgrep-wheel:
     name: Build Semgrep wheel
     runs-on: ubuntu-latest
+    permissions:
+      packages: write # to push the docker image
     defaults:
       run:
         shell: bash
