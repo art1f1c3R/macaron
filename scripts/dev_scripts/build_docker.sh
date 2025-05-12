@@ -24,16 +24,8 @@ then
     exit 1
 fi
 
-SEMGREP_WHEEL_PATH=$(find "$DIST_PATH" -depth -type f -name 'semgrep-*.whl' | head -n 1)
-if [[ -z "${SEMGREP_WHEEL_PATH}" ]];
-then
-    echo "Unable to find Semgrep wheel file in ${DIST_PATH}."
-    exit 1
-fi
-
 # We need to use the relative path so that it works in the docker context.
 WHEEL_PATH=$(realpath --relative-to="$REPO_PATH" "$WHEEL_PATH")
-SEMGREP_WHEEL_PATH=$(realpath --relative-to="$REPO_PATH" "$SEMGREP_WHEEL_PATH")
 
 if [[ -z "${RELEASE_TAG}" ]];
 then
@@ -41,14 +33,12 @@ then
         -t "${IMAGE_NAME}:latest" \
         -t "${IMAGE_NAME}:test" \
         --build-arg WHEEL_PATH="${WHEEL_PATH}" \
-        --build-arg SEMGREP_WHEEL_PATH="${SEMGREP_WHEEL_PATH}" \
         -f "${REPO_PATH}/docker/Dockerfile.final" "${REPO_PATH}"
 else
     docker build \
         -t "${IMAGE_NAME}:latest" \
         -t "${IMAGE_NAME}:${RELEASE_TAG}" \
         --build-arg WHEEL_PATH="${WHEEL_PATH}" \
-        --build-arg SEMGREP_WHEEL_PATH="${SEMGREP_WHEEL_PATH}" \
         -f "${REPO_PATH}/docker/Dockerfile.final" "$REPO_PATH"
 fi
 
